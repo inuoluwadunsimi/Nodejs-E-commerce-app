@@ -17,7 +17,9 @@ app.set('views', 'views')
 const adminRoutes = require('./routes/admin')
 const shopRoutes = require('./routes/shop')
 const Cart = require('./models/cart')
-const CartItem = require('./models/cart.-item')
+const Order = require('./models/order')
+const CartItem = require('./models/cart-item')
+const OrderItem = require('./models/order-item')
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(express.static(path.join(__dirname, 'public')))
@@ -42,10 +44,13 @@ User.hasOne(Cart)
 Cart.belongsTo(User)
 Cart.belongsToMany(Product,{through:CartItem})
 Product.belongsToMany(Cart,{through:CartItem})
+Order.belongsTo(User)
+User.hasMany(Order)
+Order.belongsToMany(Product,{through:OrderItem})
 
 sequelize
-  .sync({force:true})
-  // .sync()
+  // .sync({force:true})
+  .sync()
   .then((result) => {
     return User.findByPk(1)
     // console.log(result)
@@ -61,7 +66,12 @@ sequelize
   })
   .then((user) => {
     // console.log(user)
+   return user.createCart()
+  })
+  .then(cart=>{
+    // console.log(cart)
     app.listen(3000)
+
   })
   .catch((err) => {
     console.log(err)
